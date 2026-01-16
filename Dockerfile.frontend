@@ -1,0 +1,12 @@
+# docker build -t wasaphoto-frontend:latest -f Dockerfile.frontend .
+# docker run -it -p 8080:80 --rm wasaphoto-frontend:latest
+
+
+FROM node:lts as frontend
+WORKDIR /src/webui
+COPY webui .
+RUN npm run build-prod
+
+FROM nginx:latest
+COPY --from=frontend /src/webui/dist /usr/share/nginx/html
+EXPOSE 80

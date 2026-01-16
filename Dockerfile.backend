@@ -1,0 +1,17 @@
+# docker build -t wasaphoto-backend:latest -f Dockerfile.backend .
+#
+# Execute the Dockerfile.backend using ->
+# docker run -it -p 3000:3000 --rm wasaphoto-backend:latest 
+
+FROM golang:1.19.4 as backend
+RUN mkdir /folder/
+WORKDIR /GoFiles/
+COPY . .
+RUN go build -o /folder/ ./cmd/webapi
+
+FROM debian:stable
+WORKDIR /folder_backend/
+COPY --from=backend /folder/ .
+COPY ./webui/src/assets/icons /folder_backend/webui/src/assets/icons
+EXPOSE 3000
+CMD ["./webapi"]

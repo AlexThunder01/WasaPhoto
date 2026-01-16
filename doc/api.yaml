@@ -1,0 +1,811 @@
+openapi: 3.0.3
+info:
+  title: WASAPhoto
+  description: |-
+    Keep in touch with your friends by sharing photos of special moments, thanks to WASAPhoto! You can
+    upload your photos directly from your PC, and they will be visible to everyone following you.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+security:
+  - idAuth: []
+tags:
+    - name: login
+      description: login-related operation
+    - name: username
+      description: username-related operation      
+    - name: photo
+      description: photo-related operation
+    - name: followed
+      description: followed-related operation 
+    - name: ban
+      description: ban-related operation
+    - name: profile
+      description: profile-related operation
+    - name: likes
+      description: likes-related operation
+    - name: comments
+      description: comments-related operation
+    - name: icon
+      description: icons-related operation
+              
+components:
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    MethodNotAllowed:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    idAuth:
+      description: |-
+        this autentication method accepts a username like “Maria” without any password. If the username already exists, the user is logged in. If the username is new, the user is registered and logged in. The API will return the user identifier you need to pass into the Authorization header in any other API.
+      type: http
+      scheme: bearer      
+
+  parameters:
+    followed_user_id:
+      name: followed_user_id
+      in: path
+      description: user's id to follow
+      required: true
+      schema:
+        $ref: "#/components/schemas/User_id/properties/user_id"
+
+    like_id:
+      name: like_id
+      in: path
+      description: The like id. it is equivalent to the user_id of the person who likes it.
+      required: true
+      schema:
+        $ref: "#/components/schemas/User_id/properties/user_id"
+        
+    comment_id:
+      name: comment_id
+      in: path
+      description: The comment id
+      required: true
+      schema:
+        $ref: "#/components/schemas/Comment/properties/comment_id"
+  
+    user_id:
+      name: user_id
+      in: path
+      description: The user id
+      required: true
+      schema:
+        $ref: "#/components/schemas/User_id/properties/user_id"
+
+    photo_id:
+      name: photo_id
+      in: path    
+      description: the ID of the photo
+      required: true
+      schema:
+        $ref: "#/components/schemas/Photo/properties/photo_id"
+
+    ban_user_id:
+      name: ban_user_id
+      in: path
+      description: user's id to ban
+      required: true      
+      schema:
+        $ref: "#/components/schemas/User_id/properties/user_id"
+    
+    icon_id:
+      name: icon_id
+      in: path
+      description: user's icon id
+      required: true      
+      schema:
+        $ref: "#/components/schemas/Icon_id/properties/icon_id"
+
+  schemas:
+    Error:
+      description: This object represent an error
+      type: object
+      properties:
+        code:
+           description: The Code error
+           type: string
+        message:
+          description: The message error
+          type: string
+      required:
+         - code
+         - message
+    
+    Username:
+      description: This object represent an username
+      type: object
+      properties:
+        username:
+          description: user's username
+          type: string
+          pattern: '^.*?$'        
+          minLength: 3
+          maxLength: 16
+          example: Alessandro
+      required:
+        - username
+    
+    Image:
+      description: This object represent an image
+      type: object
+      properties:
+        image_data:
+          description: data of the Image
+          type: string
+          minLength: 10
+          maxLength: 999999
+          format: binary
+          example: "010101110101"
+      required:
+        - image_data
+  
+    User_id:
+      description: This object represent an user ID
+      type: object
+      properties:
+        user_id:
+          description: The user's ID
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9999
+          readOnly: true
+          example: 20
+      required:
+        - user_id
+    
+    Icon_id:
+      description: This object represent an icon ID
+      type: object
+      properties:
+        icon_id:
+          description: The user's icon ID
+          type: integer
+          format: int64
+          minimum: 5
+          maximum: 20
+          example: 13
+      required:
+        - icon_id
+
+    Photo:
+      description: This object represent a photo
+      type: object
+      properties:
+        datetime:
+          description: The timestamp in ISO8601 format
+          type: string
+          format: date-time
+          example: 2023-10-07T14:30:10
+        likes:
+          description: The photo's likes. it's an array of user_Id
+          type: array
+          minItems: 0
+          maxItems: 9999
+          items:
+            $ref: "#/components/schemas/User_id"
+        comments:
+          description: the photo's comments
+          type: array
+          minItems: 0
+          maxItems: 9999
+          items:
+            $ref: "#/components/schemas/Comment"
+        photo_id:
+          description: Photo ID
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9999
+          readOnly: true
+          example: 2032
+        author_id:          
+          $ref: "#/components/schemas/User_id/properties/user_id"
+      required:
+        - datetime
+        - likes
+        - comments
+        - photo_id
+        - author_id
+
+    Photos:
+      description: This object represent a list of photos
+      type: object
+      properties:
+        photo_list:
+          description: List of photos
+          type: array
+          minItems: 0
+          maxItems: 9999
+          items:
+            $ref: "#/components/schemas/Photo"
+      required:
+        - photo_list            
+        
+    Comment:
+      description: This object represent a comment
+      type: object
+      properties:
+        text:
+          description: The content of the comment
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: '^.*?$'
+          example: nice picture        
+        author_id:          
+          $ref: "#/components/schemas/User_id/properties/user_id"
+        comment_id:
+          description: The comment's ID
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9999
+          readOnly: true
+          example: 2030
+        photo_id:        
+          $ref: "#/components/schemas/Photo/properties/photo_id"
+        datetime:
+          $ref: "#/components/schemas/Photo/properties/datetime"
+      required:
+        - text
+        - photo_id
+        - author_id
+        - comment_id
+        - datetime
+
+    Text:
+      description: This object represent a text
+      type: object
+      properties:
+        text:
+          $ref: "#/components/schemas/Comment/properties/text"
+      required:
+        - text
+
+    Profile:
+      description: This object represent a user profile
+      type: object
+      properties:
+        owner:          
+          $ref: "#/components/schemas/User_id/properties/user_id"
+        photos:          
+          $ref: "#/components/schemas/Photos/properties/photo_list"        
+        followers:
+          description: The user's followers
+          type: array
+          minItems: 0
+          maxItems: 999
+          items:
+            $ref: "#/components/schemas/User_id"            
+        following:
+          description: the user's following
+          type: array
+          minItems: 0
+          maxItems: 9999
+          items:
+            $ref: "#/components/schemas/User_id"
+        icon_id:
+          $ref: "#/components/schemas/Icon_id/properties/icon_id"                  
+      required:
+        - owner
+        - photos        
+        - followers
+        - following        
+        - icon_id
+
+    PartialProfile:
+      description: This object represent a partial user profile
+      type: object
+      properties:
+        owner:          
+          $ref: "#/components/schemas/User_id/properties/user_id"
+        icon_id:
+          $ref: "#/components/schemas/Icon_id/properties/icon_id"                  
+      required:
+        - owner      
+        - icon_id
+    
+
+paths:
+  /session:
+    post:
+      tags: ["login"]
+      security: []
+      summary: Logs in the user
+      description: |-
+        If the user does not exist, it will be created,
+        and an identifier is returned.
+        If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Username"            
+        required: true
+      responses:
+        201:
+          description: User log-in action successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User_id'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{user_id}/home:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+
+    get:
+      tags: ["photo"]
+      operationId: getMyStream
+      summary: Get the stream
+      description:  |-
+        get the list of photos of the user followed. Photos are loaded in reverse chronological order.
+      responses:
+        200:
+          description: operation successfull
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photos"
+        400:
+          $ref: '#/components/responses/BadRequest'                
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+          
+  /users/{user_id}:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+    put:
+      tags: ["username"]
+      operationId: setMyUserName
+      summary: change user's username
+      description: |-
+        this operation allows a user to change his own username
+      requestBody:
+        description: An Username
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Username"
+        required: true
+      responses:
+        204:
+          description: username changed successfully
+        400:
+          $ref: '#/components/responses/BadRequest'          
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags: ["username"]
+      operationId: getUsername
+      summary: Get an username
+      description: |-
+        This operation allows the user to obtain the username by their user id.
+      responses:
+        200:
+          description: user get successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /icons/{icon_id}/:
+    parameters:
+      - $ref: "#/components/parameters/icon_id"
+    get:
+      tags: ["icon"]
+      operationId: getServerIcon
+      summary: Get an icon from the server
+      description: |-
+        This operation allows the user to obtain an icon from the server.
+      responses:
+        200:
+          description: icon get successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Image"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /users/{user_id}/icon:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+    get:
+      tags: ["icon"]
+      operationId: getUserIconID
+      summary: Get user's iconID
+      description: |-
+        This operation allows the user to request the icon ID of another user.
+      responses:
+        200:
+          description: icon get successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Icon_id"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: ["icon"]
+      operationId: setUserIcon
+      summary: Set user's icon
+      description: this operation allows the user to change their icon.      
+      responses:
+        204:
+          description: Icon changed successfully
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'             
+
+  /users/{user_id}/profile:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+    get:
+      tags: ["profile"]
+      operationId: getUserProfile
+      summary: Get an user profile
+      description: |-
+        this operation allows the user to obtain a user profile.
+      responses:
+        200:
+          description: user get successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        206:
+          description: user get successfully but it's banned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartialProfile"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+
+  /users/{user_id}/followed/{followed_user_id}:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+      - $ref: "#/components/parameters/followed_user_id"
+    put:
+      tags: ["followed"]
+      operationId: followUser
+      summary: Follow a user
+      description: adds a following to the list of followed people      
+      responses:
+        204:
+          description: User followed successfully
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: ["followed"]
+      operationId: unfollowUser
+      summary: remove a specific followed user
+      description: |-
+        remove a specific followed user using the parameter followed_user_id
+      responses:
+        204:
+          description: "User unfollowed successfully"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{user_id}/photos: 
+    parameters:
+      - $ref: "#/components/parameters/user_id"               
+    post:
+      tags: ["photo"]
+      operationId: uploadPhoto
+      summary: Add a photo
+      description: Add a photo using the object in the requestBody
+      requestBody:
+        description: An Image
+        content:
+          image/png:
+            schema:
+              $ref: "#/components/schemas/Image"            
+        required: true
+      responses:
+        201:
+          description: Photo uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photo"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+                  
+  /users/{user_id}/photos/{photo_id}:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+      - $ref: "#/components/parameters/photo_id"
+    get:
+      tags: ["photo"]
+      operationId: getPhoto
+      summary: Get an user photo
+      description: |-
+        this operation allows the user to obtain an user's photo.
+      responses:
+        200:
+          description: photo get successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photo"
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: ["photo"]
+      operationId: deletePhoto
+      summary: Delete a photo 
+      description: |-
+        Delete a user's photo. the photo can only be removed 
+        if the author of that photo is the user himself
+      responses:
+        204:
+          description: "Photo deleted successfully"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{user_id}/photos/{photo_id}/likes/{like_id}:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+      - $ref: "#/components/parameters/photo_id"
+      - $ref: "#/components/parameters/like_id"
+    put:
+      tags: ["likes"]
+      operationId: likePhoto
+      summary: Add a Like
+      description: Add a Like to a user's photo.     
+      responses:
+        204:
+          description: Like added successfully
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: ["likes"]
+      operationId: unlikePhoto
+      summary: remove a like
+      description: |-
+        remove a like from a user's photo.
+      responses:
+        204:
+          description: Like removed successfully
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /users/{user_id}/photos/{photo_id}/comments:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+      - $ref: "#/components/parameters/photo_id"
+
+    post:
+      tags: ["comments"]
+      summary: comment a Photo
+      operationId: commentPhoto
+      description: Add a comment to a user's photo. 
+      requestBody:
+        description: A text
+        content:
+          text/plain:
+            schema: 
+              $ref: '#/components/schemas/Text'
+        required: true
+      responses:
+        201:
+          description: The comment was added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  
+  /users/{user_id}/photos/{photo_id}/comments/{comment_id}:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+      - $ref: "#/components/parameters/photo_id"
+      - $ref: "#/components/parameters/comment_id"
+
+    delete:
+      tags: ["comments"]
+      operationId: uncommentPhoto
+      summary: remove a comment from a photo
+      description: |-
+        remove a comment from a photo using the photo_id's.
+      responses:
+        204:
+          description: "comment removed successfully"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{user_id}/ban/{ban_user_id}:
+    parameters:
+        - $ref: "#/components/parameters/user_id"
+        - $ref: "#/components/parameters/ban_user_id"
+
+    put:
+      tags: ["ban"] 
+      operationId: banUser
+      summary: ban a user
+      description: Ban the user specified in the body request      
+      responses:
+        204:
+          description: "User banned successfully"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: ["ban"]
+      operationId: unbanUser
+      summary: remove a ban
+      description: |-
+        remove a ban of a specific user using their id.
+      responses:
+        204:
+          description: user unbanned successfully
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        405:
+          $ref: '#/components/responses/MethodNotAllowed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
