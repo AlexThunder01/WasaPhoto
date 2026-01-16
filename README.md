@@ -1,5 +1,5 @@
 
-# WasaPhoto. Social Network – Full-Stack Web Application
+# WasaPhoto Social Network – Full-Stack Web Application
 
 This repository contains a **full-stack social network application** showcasing modern web development practices, clean architecture, and scalable design. The platform allows users to register, create profiles, post content, comment, follow others, and interact through a real-time feed with notifications. It demonstrates practical skills in backend development, API design, frontend engineering, and end-to-end software delivery.
 
