@@ -127,7 +127,3 @@ Contributions are welcome. Suggested workflow:
 [MIT License](LICENSE)
 
 ---
-
-Questo README è **professionale, completo e pronto per un portfolio GitHub**, evidenziando competenze tecniche, architettura, stack tecnologico e funzionalità principali del progetto.
-
-Se vuoi, posso fare **una versione ancora più visiva con badge, screenshots e gif dimostrative**, che aumentano l’impatto per recruiter e aziende. Vuoi che lo faccia?
